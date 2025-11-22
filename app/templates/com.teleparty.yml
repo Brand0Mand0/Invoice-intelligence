@@ -1,0 +1,15 @@
+issuer: Teleparty
+keywords:
+  - Teleparty Premium Subscription
+  - Teleparty Bill
+  - due May 2
+  - Pay online
+  - F794257C
+fields:
+  amount: (?s)Amount due \$\s*(\d+\.\d{2}) USD
+  date: Date of issue (\w+ \d{1,2}, \d{4})
+  invoice_number: Invoice number ([A-Z0-9]+)
+options:
+  currency: USD
+  date_formats:
+    - '%B %d, %Y'

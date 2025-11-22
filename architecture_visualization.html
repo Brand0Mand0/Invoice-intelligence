@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Intelligence Platform - Architecture Diagram</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.6.1/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #2d3748;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        h2 {
+            color: #4a5568;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+            margin-top: 40px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+        .diagram-container {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 30px 0;
+            border: 2px solid #e2e8f0;
+        }
+        .mermaid {
+            text-align: center;
+        }
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .legend-color {
+            width: 30px;
+            height: 20px;
+            border-radius: 4px;
+            border: 1px solid #cbd5e0;
+        }
+        .phase-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .phase-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            border: 2px solid #cbd5e0;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .phase-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .phase-card h3 {
+            color: #667eea;
+            margin-top: 0;
+            font-size: 1.3em;
+        }
+        .phase-card ul {
+            color: #4a5568;
+            line-height: 1.8;
+        }
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .tech-badge {
+            background: #edf2f7;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            color: #2d3748;
+            border: 1px solid #cbd5e0;
+        }
+        .flow-description {
+            background: #fef5e7;
+            border-left: 4px solid #f39c12;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .flow-description h4 {
+            margin-top: 0;
+            color: #e67e22;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧾 Invoice Intelligence Platform</h1>
+        <p class="subtitle">3-Day MVP Architecture & Data Flow</p>
+
+        <h2>System Architecture Overview</h2>
+        <div class="diagram-container">
+            <div class="mermaid">
+                graph TB
+                    subgraph "Frontend Layer"
+                        UI[Streamlit Dashboard<br/>Port: 8501]
+                        UI1[Upload Interface]
+                        UI2[Analytics Dashboard]
+                        UI3[Chat Interface]
+                        UI4[Export Module]
+                        
+                        UI --> UI1
+                        UI --> UI2
+                        UI --> UI3
+                        UI --> UI4
+                    end
+                    
+                    subgraph "API Layer"
+                        API[FastAPI Backend<br/>Port: 8000]
+                        Q[Async Job Queue]
+                        P[Parser Pipeline]
+                        N[Normalizer]
+                        A[Analytics Engine]
+                        C[Chat Handler]
+                        T[TEE Verifier]
+                        
+                        API --> Q
+                        Q --> P
+                        P --> N
+                        API --> A
+                        API --> C
+                        C --> T
+                    end
+                    
+                    subgraph "Data Layer"
+                        DB[(PostgreSQL<br/>Port: 5432)]
+                        CACHE[Parse Cache]
+                        
+                        DB --> CACHE
+                    end
+                    
+                    subgraph "External Services"
+                        NEAR[NEAR AI Cloud]
+                        DS[DeepSeek V3.1<br/>Extraction]
+                        GLM[GLM-4.6<br/>Chat]
+                        TEE[TEE Attestation]
+                        
+                        NEAR --> DS
+                        NEAR --> GLM
+                        NEAR --> TEE
+                    end
+                    
+                    subgraph "Future Components"
+                        PG[pgvector<br/>Embeddings]
+                        R[Redis<br/>Memory Cache]
+                        NEO[Neo4j<br/>Graph DB]
+                        
+                        style PG fill:#e8f4fd,stroke:#1e88e5,stroke-dasharray: 5 5
+                        style R fill:#e8f4fd,stroke:#1e88e5,stroke-dasharray: 5 5
+                        style NEO fill:#e8f4fd,stroke:#1e88e5,stroke-dasharray: 5 5
+                    end
+                    
+                    UI1 --> API
+                    UI2 --> API
+                    UI3 --> API
+                    UI4 --> API
+                    
+                    P --> DS
+                    C --> GLM
+                    T --> TEE
+                    
+                    N --> DB
+                    A --> DB
+                    T --> DB
+                    
+                    DB -.-> PG
+                    API -.-> R
+                    API -.-> NEO
+                    
+                    style UI fill:#c8e6c9,stroke:#4caf50,stroke-width:3px
+                    style API fill:#fff3e0,stroke:#ff9800,stroke-width:3px
+                    style DB fill:#e1bee7,stroke:#9c27b0,stroke-width:3px
+                    style NEAR fill:#ffecb3,stroke:#ffa726,stroke-width:3px
+            </div>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background: #c8e6c9;"></div>
+                <span>Frontend Components</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #fff3e0;"></div>
+                <span>Backend Services</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #e1bee7;"></div>
+                <span>Database</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #ffecb3;"></div>
+                <span>AI Services</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #e8f4fd; border-style: dashed;"></div>
+                <span>Future Additions</span>
+            </div>
+        </div>
+
+        <h2>Data Processing Flow</h2>
+        <div class="diagram-container">
+            <div class="mermaid">
+                flowchart LR
+                    subgraph "Input"
+                        PDF[PDF Invoice]
+                    end
+                    
+                    subgraph "Processing Pipeline"
+                        UP[Upload Handler]
+                        JQ[Job Queue]
+                        P1[pdfplumber]
+                        P2[invoice2data]
+                        P3[NEAR AI<br/>DeepSeek]
+                        VN[Vendor<br/>Normalizer]
+                        PC[Parse Cache]
+                    end
+                    
+                    subgraph "Storage"
+                        INV[Invoice Table]
+                        VEN[Vendor Table]
+                        LI[LineItems Table]
+                        CONV[Conversations]
+                    end
+                    
+                    subgraph "Analysis"
+                        AGG[Aggregation]
+                        CHAT[Chat Query]
+                        VIZ[Visualizations]
+                        EXP[CSV Export]
+                    end
+                    
+                    PDF --> UP
+                    UP --> JQ
+                    JQ --> P1
+                    P1 -->|Fail| P2
+                    P2 -->|Fail| P3
+                    P1 -->|Success| VN
+                    P2 -->|Success| VN
+                    P3 -->|Success| VN
+                    
+                    VN --> PC
+                    PC --> INV
+                    INV --> VEN
+                    INV --> LI
+                    
+                    INV --> AGG
+                    VEN --> AGG
+                    LI --> AGG
+                    
+                    AGG --> VIZ
+                    AGG --> EXP
+                    
+                    CHAT --> CONV
+                    AGG --> CHAT
+                    
+                    style PDF fill:#ffd54f
+                    style VIZ fill:#81c784
+                    style EXP fill:#81c784
+                    style CHAT fill:#64b5f6
+            </div>
+        </div>
+
+        <div class="flow-description">
+            <h4>📝 Processing Pipeline Details</h4>
+            <ol>
+                <li><strong>Async Upload:</strong> PDF uploaded via Streamlit, job ID returned immediately</li>
+                <li><strong>Multi-tier Parsing:</strong> Attempts pdfplumber → invoice2data → NEAR AI fallback</li>
+                <li><strong>Vendor Normalization:</strong> Standardizes vendor names (AMZN → Amazon)</li>
+                <li><strong>Caching Layer:</strong> Stores parsed results to avoid reprocessing</li>
+                <li><strong>Database Storage:</strong> Structured data saved to PostgreSQL</li>
+                <li><strong>Analytics & Chat:</strong> Real-time analysis and natural language queries</li>
+            </ol>
+        </div>
+
+        <h2>Development Phases</h2>
+        <div class="phase-grid">
+            <div class="phase-card">
+                <h3>📅 Day 1: Foundation</h3>
+                <ul>
+                    <li>PostgreSQL setup & schema</li>
+                    <li>FastAPI async architecture</li>
+                    <li>PDF parsing pipeline</li>
+                    <li>Vendor normalization</li>
+                    <li>NEAR AI integration</li>
+                    <li>Job queue implementation</li>
+                </ul>
+                <div class="tech-stack">
+                    <span class="tech-badge">FastAPI</span>
+                    <span class="tech-badge">PostgreSQL</span>
+                    <span class="tech-badge">pdfplumber</span>
+                    <span class="tech-badge">NEAR AI</span>
+                </div>
+            </div>
+
+            <div class="phase-card">
+                <h3>📊 Day 2: Intelligence</h3>
+                <ul>
+                    <li>Streamlit dashboard</li>
+                    <li>Data analytics queries</li>
+                    <li>Visualization components</li>
+                    <li>Export functionality</li>
+                    <li>Real-time updates</li>
+                    <li>Error handling</li>
+                </ul>
+                <div class="tech-stack">
+                    <span class="tech-badge">Streamlit</span>
+                    <span class="tech-badge">Plotly</span>
+                    <span class="tech-badge">Pandas</span>
+                    <span class="tech-badge">SQLAlchemy</span>
+                </div>
+            </div>
+
+            <div class="phase-card">
+                <h3>🤖 Day 3: AI & Trust</h3>
+                <ul>
+                    <li>Natural language chat</li>
+                    <li>GLM-4.6 integration</li>
+                    <li>TEE attestation</li>
+                    <li>Trust indicators</li>
+                    <li>Query optimization</li>
+                    <li>Final testing</li>
+                </ul>
+                <div class="tech-stack">
+                    <span class="tech-badge">GLM-4.6</span>
+                    <span class="tech-badge">TEE</span>
+                    <span class="tech-badge">Chat UI</span>
+                </div>
+            </div>
+        </div>
+
+        <h2>API Endpoints Structure</h2>
+        <div class="diagram-container">
+            <div class="mermaid">
+                graph LR
+                    subgraph "Upload Flow"
+                        POST1[POST /api/upload]
+                        GET1[GET /api/status/:id]
+                        POST1 --> GET1
+                    end
+                    
+                    subgraph "Data Access"
+                        GET2[GET /api/invoices]
+                        GET3[GET /api/vendors]
+                        GET4[GET /api/analytics/monthly]
+                    end
+                    
+                    subgraph "Intelligence"
+                        POST2[POST /api/chat]
+                        GET5[GET /api/attestation/:id]
+                        POST2 --> GET5
+                    end
+                    
+                    subgraph "Export"
+                        GET6[GET /api/export/csv]
+                    end
+                    
+                    style POST1 fill:#4caf50,color:#fff
+                    style POST2 fill:#4caf50,color:#fff
+                    style GET1 fill:#2196f3,color:#fff
+                    style GET2 fill:#2196f3,color:#fff
+                    style GET3 fill:#2196f3,color:#fff
+                    style GET4 fill:#2196f3,color:#fff
+                    style GET5 fill:#2196f3,color:#fff
+                    style GET6 fill:#2196f3,color:#fff
+            </div>
+        </div>
+
+        <h2>Future Enhancements Roadmap</h2>
+        <div class="diagram-container">
+            <div class="mermaid">
+                timeline
+                    title Post-MVP Development Timeline
+                    
+                    Week 2: Semantic Search
+                          : pgvector setup
+                          : Embeddings generation
+                          : Redis caching
+                          : Memory management
+                    
+                    Week 3: Graph Intelligence
+                          : Neo4j integration
+                          : Relationship mapping
+                          : Complex queries
+                          : GraphRAG
+                    
+                    Month 2: Enterprise
+                          : Authentication
+                          : Multi-tenant
+                          : Gmail integration
+                          : Batch processing
+                    
+                    Month 3: Scale
+                          : Kubernetes
+                          : Celery workers
+                          : QuickBooks/SAP
+                          : Anomaly detection
+            </div>
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'base',
+            themeVariables: {
+                primaryColor: '#667eea',
+                primaryTextColor: '#2d3748',
+                primaryBorderColor: '#4a5568',
+                lineColor: '#cbd5e0',
+                secondaryColor: '#f7fafc',
+                tertiaryColor: '#edf2f7'
+            }
+        });
+    </script>
+</body>
+</html>

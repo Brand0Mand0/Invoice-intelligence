@@ -1,0 +1,15 @@
+issuer: Saje Natural Wellness
+fields:
+  invoice_number: 'ORDER\s+(\S+)'
+  date: '(\d{4}-\d{2}-\d{2})\s+\d{2}:\d{2}:\d{2}'
+  amount: '\$(\d+\.\d{2})'
+keywords:
+  - Saje Natural Wellness
+  - ORDER
+  - AUTHORIZED
+  - VISA CREDIT
+  - EMV chip credit cards
+options:
+  currency: USD
+  date_formats:
+    - '%Y-%m-%d'

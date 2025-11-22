@@ -1,0 +1,20 @@
+issuer: LinkedIn Corporation
+keywords:
+  - LinkedIn Corporation
+  - Premium Career
+  - Admin Center
+  - Manage Premium Account
+  - FEIN: 47-0912023
+fields:
+  invoice_number: 'Invoice Number\s*\n(?:\S+\s+)*(\d+)'
+  date: 'Transaction Date\s*\n(?:\S+\s+)*(\d{1,2}/\d{1,2}/\d{4})'
+  amount: 'Total : \$\s*([\d,]+\.\d{2})'
+  amount_untaxed: 'Subtotal : \$\s*([\d,]+\.\d{2})'
+  tax: 'Sales tax : [\d.%]+\s*\$\s*([\d,]+\.\d{2})'
+options:
+  currency: USD
+  date_formats:
+    - '%m/%d/%Y'
+  decimal_separator: '.'
+  replace:
+    - ['[,\$]', '']
