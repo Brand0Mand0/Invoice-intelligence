@@ -54,6 +54,7 @@ Thumbs.db
 
 # Project documentation (local only)
 SPEC_FINAL.md
+SPEC.md
 PROFESSIONAL_CODE_REVIEW.md
 CLAUDE.md
 .claude/
