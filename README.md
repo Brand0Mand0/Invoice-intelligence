@@ -71,10 +71,10 @@ flowchart TB
     EMBED --> PG
     API <--> PG
 
-    style UI fill:#e1f5ff,stroke:#01579b,stroke-width:2px
-    style API fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    style NEAR fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px
-    style PG fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+    style UI fill:#e1f5ff,stroke:#01579b,stroke-width:2px,color:#000
+    style API fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000
+    style NEAR fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px,color:#000
+    style PG fill:#fce4ec,stroke:#880e4f,stroke-width:2px,color:#000
 ```
 
 ### Data Processing Flow
@@ -97,11 +97,11 @@ flowchart LR
     STORE --> ANALYTICS[Analytics<br/>Dashboard]
     STORE --> CHAT[AI Chat<br/>Interface]
 
-    style PDF fill:#ffd54f,stroke:#f57c00,stroke-width:2px
-    style STORE fill:#e1bee7,stroke:#7b1fa2,stroke-width:2px
-    style SEARCH fill:#c5e1a5,stroke:#558b2f,stroke-width:2px
-    style ANALYTICS fill:#c5e1a5,stroke:#558b2f,stroke-width:2px
-    style CHAT fill:#c5e1a5,stroke:#558b2f,stroke-width:2px
+    style PDF fill:#ffd54f,stroke:#f57c00,stroke-width:2px,color:#000
+    style STORE fill:#e1bee7,stroke:#7b1fa2,stroke-width:2px,color:#000
+    style SEARCH fill:#c5e1a5,stroke:#558b2f,stroke-width:2px,color:#000
+    style ANALYTICS fill:#c5e1a5,stroke:#558b2f,stroke-width:2px,color:#000
+    style CHAT fill:#c5e1a5,stroke:#558b2f,stroke-width:2px,color:#000
 ```
 
 ---
