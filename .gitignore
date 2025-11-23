@@ -58,6 +58,10 @@ Thumbs.db
 # Project documentation (local only)
 SPEC_FINAL.md
 SPEC.md
+IMPLEMENTATION_PLAN.md
 PROFESSIONAL_CODE_REVIEW.md
 CLAUDE.md
 .claude/
+
+# Hugging Face model cache
+.cache/
