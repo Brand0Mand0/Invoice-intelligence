@@ -3,6 +3,7 @@ from datetime import datetime
 from sqlalchemy import Column, String, Numeric, DateTime, Float, ForeignKey, Text, Date, Boolean
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
+from pgvector.sqlalchemy import Vector
 from app.core.database import Base
 
 
@@ -29,6 +30,9 @@ class Invoice(Base):
     confidence_score = Column(Float)
     parser_used = Column(String(50), nullable=False)  # 'invoice2data' | 'deepseek' | 'glm-4.6'
     parser_version = Column(String(20))
+
+    # Vector embedding for semantic search
+    embedding = Column(Vector(1024))  # 1024 dimensions (BGE-Large / OpenAI-3-small)
 
     # Relationships
     line_items = relationship("LineItem", back_populates="invoice", cascade="all, delete-orphan")

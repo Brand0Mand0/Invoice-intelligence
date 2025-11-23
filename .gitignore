@@ -43,6 +43,9 @@ wheels/
 uploads/
 *.pdf
 
+# Templates (user-generated)
+app/templates/*.yml
+
 # Testing
 .coverage
 htmlcov/

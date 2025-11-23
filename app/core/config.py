@@ -9,6 +9,10 @@ class Settings(BaseSettings):
     NEAR_AI_API_KEY: str
     NEAR_AI_BASE_URL: str = "https://api.near.ai"
 
+    # Embedding Configuration
+    EMBEDDING_PROVIDER: str = "bge"  # "bge" (local, free) | "openai" (API, paid)
+    OPENAI_API_KEY: str = ""  # Optional, only needed if EMBEDDING_PROVIDER=openai
+
     # Database Configuration
     DATABASE_URL: str
 

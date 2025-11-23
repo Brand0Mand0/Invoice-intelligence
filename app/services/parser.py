@@ -335,6 +335,23 @@ Return ONLY valid YAML, no markdown or explanations."""
             )
             self.db.add(line_item)
 
+        # Generate embedding for semantic search
+        try:
+            from app.services.embeddings import generate_invoice_embedding
+            embedding = await generate_invoice_embedding(invoice)
+            invoice.embedding = embedding
+            logger.info(
+                "Generated embedding for invoice",
+                extra={"extra_data": {"invoice_id": str(invoice.id), "vendor": vendor_normalized}}
+            )
+        except Exception as e:
+            logger.warning(
+                "Failed to generate embedding (non-fatal)",
+                exc_info=True,
+                extra={"extra_data": {"invoice_id": str(invoice.id), "error": str(e)}}
+            )
+            # Continue without embedding - semantic search will be unavailable for this invoice
+
         # Update vendor aggregates
         self.normalizer.update_vendor_stats(
             vendor_normalized,

@@ -1,11 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import List
 from app.api.deps import get_db
 from app.models.invoice import Invoice, LineItem
+from app.services.embeddings import generate_embedding
+from app.core.logging_config import get_logger
 
 router = APIRouter()
+logger = get_logger(__name__)
 
 
 @router.get("/invoices")
@@ -94,3 +97,169 @@ def get_vendors(db: Session = Depends(get_db)):
             for vendor in vendors
         ]
     }
+
+
+@router.get("/search/semantic")
+async def semantic_search(
+    query: str = Query(..., description="Natural language search query"),
+    limit: int = Query(10, ge=1, le=100, description="Number of results to return"),
+    db: Session = Depends(get_db)
+):
+    """
+    Semantic search for invoices using natural language queries.
+
+    Examples:
+    - "software subscriptions"
+    - "cloud computing expenses"
+    - "recurring monthly charges"
+    - "office supplies under $50"
+
+    Uses vector similarity to find conceptually related invoices.
+    """
+    logger.info(
+        "Semantic search request",
+        extra={"extra_data": {"query": query, "limit": limit}}
+    )
+
+    try:
+        # Generate embedding for the search query (with BGE instruction prefix)
+        query_embedding = await generate_embedding(query, is_query=True)
+
+        # Find similar invoices using cosine distance
+        # <=> is the cosine distance operator in pgvector
+        results = db.query(
+            Invoice,
+            Invoice.embedding.cosine_distance(query_embedding).label("distance")
+        ).filter(
+            Invoice.embedding.isnot(None)  # Only invoices with embeddings
+        ).order_by(
+            "distance"  # Closest matches first (lower distance = more similar)
+        ).limit(limit).all()
+
+        logger.info(
+            "Semantic search completed",
+            extra={"extra_data": {"query": query, "results_count": len(results)}}
+        )
+
+        return {
+            "query": query,
+            "results": [
+                {
+                    "id": str(inv.id),
+                    "vendor_name": inv.vendor_name,
+                    "vendor_normalized": inv.vendor_normalized,
+                    "invoice_number": inv.invoice_number,
+                    "date": inv.date.isoformat() if inv.date else None,
+                    "total_amount": float(inv.total_amount),
+                    "category": inv.category,
+                    "purchaser": inv.purchaser,
+                    "is_recurring": inv.is_recurring,
+                    "similarity_score": 1 - distance,  # Convert distance to similarity (0-1)
+                    "confidence_score": inv.confidence_score,
+                }
+                for inv, distance in results
+            ],
+            "total": len(results)
+        }
+
+    except Exception as e:
+        logger.error(
+            "Semantic search failed",
+            exc_info=True,
+            extra={"extra_data": {"query": query, "error": str(e)}}
+        )
+        raise HTTPException(
+            status_code=500,
+            detail=f"Semantic search failed: {str(e)}"
+        )
+
+
+@router.get("/invoices/{invoice_id}/similar")
+async def find_similar_invoices(
+    invoice_id: str,
+    limit: int = Query(5, ge=1, le=50, description="Number of similar invoices to return"),
+    db: Session = Depends(get_db)
+):
+    """
+    Find invoices similar to a specific invoice.
+
+    Uses vector similarity to find invoices with similar characteristics
+    (vendor type, category, amount range, etc.)
+    """
+    # Get the target invoice
+    target_invoice = db.query(Invoice).filter(Invoice.id == invoice_id).first()
+
+    if not target_invoice:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+
+    if target_invoice.embedding is None:
+        raise HTTPException(
+            status_code=400,
+            detail="Target invoice does not have an embedding. Try reprocessing the invoice."
+        )
+
+    logger.info(
+        "Find similar invoices request",
+        extra={
+            "extra_data": {
+                "target_invoice_id": invoice_id,
+                "vendor": target_invoice.vendor_normalized,
+                "limit": limit
+            }
+        }
+    )
+
+    try:
+        # Find similar invoices using cosine distance
+        results = db.query(
+            Invoice,
+            Invoice.embedding.cosine_distance(target_invoice.embedding).label("distance")
+        ).filter(
+            Invoice.embedding.isnot(None),
+            Invoice.id != invoice_id  # Exclude the target invoice itself
+        ).order_by(
+            "distance"
+        ).limit(limit).all()
+
+        logger.info(
+            "Find similar invoices completed",
+            extra={"extra_data": {"target_invoice_id": invoice_id, "results_count": len(results)}}
+        )
+
+        return {
+            "target_invoice": {
+                "id": str(target_invoice.id),
+                "vendor_name": target_invoice.vendor_name,
+                "vendor_normalized": target_invoice.vendor_normalized,
+                "category": target_invoice.category,
+                "total_amount": float(target_invoice.total_amount),
+            },
+            "similar_invoices": [
+                {
+                    "id": str(inv.id),
+                    "vendor_name": inv.vendor_name,
+                    "vendor_normalized": inv.vendor_normalized,
+                    "invoice_number": inv.invoice_number,
+                    "date": inv.date.isoformat() if inv.date else None,
+                    "total_amount": float(inv.total_amount),
+                    "category": inv.category,
+                    "purchaser": inv.purchaser,
+                    "is_recurring": inv.is_recurring,
+                    "similarity_score": 1 - distance,
+                    "confidence_score": inv.confidence_score,
+                }
+                for inv, distance in results
+            ],
+            "total": len(results)
+        }
+
+    except Exception as e:
+        logger.error(
+            "Find similar invoices failed",
+            exc_info=True,
+            extra={"extra_data": {"target_invoice_id": invoice_id, "error": str(e)}}
+        )
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to find similar invoices: {str(e)}"
+        )
